@@ -1,0 +1,1548 @@
+<title>Trail Finder | TrailPeaches</title>
+<style>
+/* ── TOKENS (light only) ─────────────────────────────── */
+:root {
+  --bg:          #eef2eb;
+  --surface:     #ffffff;
+  --surface-2:   #e3ebe0;
+  --text:        #16211a;
+  --text-2:      #475f3e;
+  --text-3:      #7a9470;
+  --accent:      #bf6118;
+  --accent-bg:   #f7e8d4;
+  --border:      #c4d4be;
+  --card-sh:     0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px var(--border);
+  --radius:      6px;
+  --permit-col:  #6a4800;
+  --permit-bg:   rgba(200,140,0,0.12);
+  --permit-bdr:  rgba(200,140,0,0.35);
+  --farout-col:  #006850;
+  --farout-bg:   rgba(0,104,80,0.1);
+  --farout-bdr:  rgba(0,104,80,0.3);
+  --navw-col:    #7a3200;
+  --navw-bg:     rgba(122,50,0,0.1);
+  --navw-bdr:    rgba(122,50,0,0.3);
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ──────────────────────────────────────────── */
+.hd {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+.hd-title {
+  font-family: Impact, 'Haettenschweiler', 'Arial Narrow', 'Arial Black', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1;
+}
+.hd-pipe { width: 1px; height: 18px; background: var(--border); }
+.hd-sub {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.hd-count {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.layout {
+  display: flex;
+  height: calc(100vh - 47px);
+  overflow: hidden;
+}
+
+/* ── FILTER PANEL ─────────────────────────────────────── */
+.filters {
+  width: 250px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 14px 20px;
+}
+
+.f-section { margin-bottom: 16px; }
+
+.f-label {
+  display: block;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin-bottom: 7px;
+}
+.f-sublabel {
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-3);
+  text-transform: none;
+}
+
+.f-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+/* Days */
+.days-num {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 5px;
+  font-variant-numeric: tabular-nums;
+}
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.58rem;
+  color: var(--text-3);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+
+/* Experience */
+.exp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.exp-btn {
+  padding: 6px 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.35;
+  transition: border-color 0.1s, background 0.1s, color 0.1s;
+}
+.exp-btn:hover { border-color: var(--accent); color: var(--accent); }
+.exp-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Months */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+}
+.mo-btn {
+  padding: 4px 2px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.mo-btn:hover { border-color: var(--accent); color: var(--accent); }
+.mo-btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Region */
+.region-list { display: flex; flex-direction: column; gap: 4px; }
+.rg-item {
+  display: flex; align-items: center; gap: 7px;
+  cursor: pointer; font-size: 0.76rem; color: var(--text);
+  padding: 1px 0;
+}
+.rg-item input[type="checkbox"] { accent-color: var(--accent); width: 13px; height: 13px; cursor: pointer; }
+.rg-blaze { width: 10px; height: 18px; border-radius: 2px; flex-shrink: 0; opacity: 0.85; }
+
+/* Terrain chips */
+.terrain-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.te-chip {
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.te-chip:hover { border-color: var(--text-2); color: var(--text); }
+.te-chip.on { background: var(--text-2); border-color: var(--text-2); color: var(--surface); }
+
+/* Nav style segmented control */
+.nav-seg {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.nav-btn {
+  flex: 1;
+  padding: 7px 3px;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  line-height: 1.35;
+  text-align: center;
+  transition: all 0.1s;
+}
+.nav-btn:last-child { border-right: none; }
+.nav-btn:hover { color: var(--text); background: var(--surface); }
+.nav-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Option checkboxes */
+.opts { display: flex; flex-direction: column; gap: 6px; }
+.opt-item {
+  display: flex; align-items: center; gap: 7px;
+  cursor: pointer; font-size: 0.76rem; color: var(--text);
+}
+.opt-item input[type="checkbox"] { accent-color: var(--accent); width: 13px; height: 13px; cursor: pointer; }
+
+/* Reset */
+.reset-btn {
+  width: 100%;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-3);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.reset-btn:hover { color: var(--text); border-color: var(--text-3); }
+
+/* ── RESULTS ──────────────────────────────────────────── */
+.results {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.results-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.results-label {
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+.results-hint {
+  font-size: 0.62rem;
+  color: var(--text-3);
+  letter-spacing: 0.02em;
+}
+
+/* Trail card */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--card-sh);
+  padding: 13px 14px;
+  margin-bottom: 9px;
+  transition: box-shadow 0.15s;
+}
+.card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 0 0 1px var(--accent);
+}
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+.card-left { flex: 1; min-width: 0; }
+.trail-name {
+  font-family: Impact, 'Haettenschweiler', 'Arial Narrow', 'Arial Black', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.trail-states {
+  font-size: 0.68rem;
+  color: var(--text-3);
+  margin-top: 1px;
+  letter-spacing: 0.02em;
+}
+.card-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+.match-pct {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.match-lbl {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Match bar */
+.bar-track {
+  height: 3px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--border) 0%, var(--accent) 100%);
+  border-radius: 2px;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.st { display: flex; flex-direction: column; }
+.st-val {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.st-lbl {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Tags */
+.tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 9px; }
+.tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.tag-region { color: #fff; }
+.tag-terrain {
+  background: var(--surface-2);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+.tag-permit {
+  background: var(--permit-bg);
+  color: var(--permit-col);
+  border: 1px solid var(--permit-bdr);
+}
+.tag-section {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.tag-loop {
+  background: var(--surface-2);
+  border: 1px solid var(--text-3);
+  color: var(--text-2);
+}
+.tag-intl {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+}
+.tag-farout {
+  background: var(--farout-bg);
+  color: var(--farout-col);
+  border: 1px solid var(--farout-bdr);
+}
+.tag-nav-signed {
+  background: var(--surface-2);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+}
+.tag-nav-route {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.tag-nav-wild {
+  background: var(--navw-bg);
+  color: var(--navw-col);
+  border: 1px solid var(--navw-bdr);
+}
+
+/* Hook */
+.hook {
+  font-size: 0.79rem;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+/* Card footer link */
+.foot-sep { color: var(--muted); margin: 0 0.35em; }
+.card-link-caltopo { color: var(--muted); }
+.card-link-caltopo:hover { color: var(--accent); }
+.card-foot {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.card-link {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-3);
+  transition: color 0.1s;
+}
+.card-link:hover { color: var(--accent); }
+.card-link-tp { color: var(--accent); }
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 56px 24px;
+  color: var(--text-3);
+}
+.empty-title {
+  font-family: Impact, 'Arial Narrow', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  color: var(--text-2);
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 620px) {
+  .layout { flex-direction: column; height: auto; overflow: visible; }
+  .filters {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 380px;
+  }
+  .results { min-height: 400px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* AI / data disclosure pop-up */
+.tp-ai-btn{font:inherit;font-size:.78rem;background:none;border:0;padding:2px 4px;color:inherit;opacity:.85;text-decoration:underline;cursor:pointer}
+.tp-ai-btn:hover{opacity:1}
+.tp-ai-ov{position:fixed;inset:0;background:rgba(20,30,25,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:99999}
+.tp-ai-ov[hidden]{display:none}
+.tp-ai-box{position:relative;max-width:560px;width:100%;max-height:calc(100vh - 32px);overflow:auto;background:#faf8f4;color:#1c1c1c;border:1px solid #e3d9cc;border-radius:14px;padding:22px 24px 18px;box-shadow:0 12px 40px rgba(0,0,0,.3);font:15px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;text-align:left;outline:none}
+.tp-ai-box h2{font:700 1.15rem/1.3 Georgia,'Times New Roman',serif;color:#2d4a3e;margin:0 30px 12px 0;padding:0;border:0}
+.tp-ai-box p{margin:0 0 .85em;color:#1c1c1c;font-size:15px}
+.tp-ai-box a{color:#c8603e;font-weight:600}
+.tp-ai-x{position:absolute;top:8px;right:10px;border:0;background:none;font-size:26px;line-height:1;padding:2px 8px;cursor:pointer;color:#4a4540}
+.tp-ai-close{font:inherit;font-size:14px;background:#2d4a3e;color:#fff;border:0;border-radius:8px;padding:7px 16px;cursor:pointer}
+</style>
+
+<header class="hd">
+  <div class="hd-title">Trail Finder</div>
+  <div class="hd-pipe"></div>
+  <div class="hd-sub">Long-Distance Trails</div>
+  <div class="hd-count" id="hd-count"></div>
+  <button type="button" class="tp-ai-btn" data-tp-ai aria-haspopup="dialog" style="font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-left:6px">AI &amp; data disclosure</button>
+</header>
+
+<div class="layout">
+
+  <!-- ── FILTERS ──────────────────────────────── -->
+  <aside class="filters" id="filters">
+
+    <div class="f-section">
+      <label class="f-label">Days Available</label>
+      <div class="days-num" id="days-disp">21 days</div>
+      <input type="range" id="days-sl" min="5" max="365" value="21" step="1">
+      <div class="slider-ticks">
+        <span>5</span><span>60</span><span>120</span><span>200</span><span>365+</span>
+      </div>
+    </div>
+
+    <hr class="f-divider">
+
+    <div class="f-section">
+      <label class="f-label">Your Experience</label>
+      <div class="exp-grid">
+        <button class="exp-btn" data-exp="1">New to<br>backpacking</button>
+        <button class="exp-btn" data-exp="2">Some<br>experience</button>
+        <button class="exp-btn on"  data-exp="3">Seasoned<br>hiker</button>
+        <button class="exp-btn" data-exp="4">Thru-hike<br>veteran</button>
+      </div>
+    </div>
+
+    <hr class="f-divider">
+
+    <div class="f-section">
+      <label class="f-label">When Can You Go? <span class="f-sublabel">(any if blank)</span></label>
+      <div class="month-grid" id="month-grid"></div>
+    </div>
+
+    <hr class="f-divider">
+
+    <div class="f-section">
+      <label class="f-label">Region <span class="f-sublabel">(any if blank)</span></label>
+      <div class="region-list" id="region-list"></div>
+    </div>
+
+    <hr class="f-divider">
+
+    <div class="f-section">
+      <label class="f-label">Terrain</label>
+      <div class="terrain-chips" id="terrain-chips"></div>
+    </div>
+
+    <hr class="f-divider">
+
+    <div class="f-section">
+      <label class="f-label">Navigation Style</label>
+      <div class="nav-seg" id="nav-seg">
+        <button class="nav-btn" data-nav="marked">Signed<br>trails</button>
+        <button class="nav-btn on" data-nav="any">Any</button>
+        <button class="nav-btn" data-nav="wild">Off-trail<br>OK</button>
+      </div>
+    </div>
+
+    <hr class="f-divider">
+
+    <div class="f-section">
+      <label class="f-label">Options</label>
+      <div class="opts">
+        <label class="opt-item"><input type="checkbox" id="o-farout"> Has FarOut guide</label>
+        <label class="opt-item"><input type="checkbox" id="o-lottery"> Avoid permit lotteries</label>
+        <label class="opt-item"><input type="checkbox" id="o-permit"> Avoid all permits</label>
+        <label class="opt-item"><input type="checkbox" id="o-remote"> Prefer remote / low crowds</label>
+        <label class="opt-item"><input type="checkbox" id="o-loop"> Prefer loops</label>
+        <label class="opt-item"><input type="checkbox" id="o-intl" checked> Include international</label>
+      </div>
+    </div>
+
+    <hr class="f-divider">
+
+    <button class="reset-btn" id="reset-btn">Reset all filters</button>
+
+  </aside>
+
+  <!-- ── RESULTS ───────────────────────────────── -->
+  <main class="results">
+    <div class="results-bar">
+      <div class="results-label" id="res-count">-- trails</div>
+      <div class="results-hint">sorted by match score</div>
+    </div>
+    <div id="res-list"></div>
+  </main>
+
+</div>
+
+<script>
+(function () {
+
+const REGIONS = {
+  pacific:   { label: 'Pacific Coast',      color: '#2060a8' },
+  northwest: { label: 'Pacific Northwest',  color: '#1a5e3a' },
+  rockies:   { label: 'Rocky Mountains',    color: '#7a5c10' },
+  southwest: { label: 'Southwest',          color: '#b83820' },
+  midwest:   { label: 'Midwest',            color: '#4e7020' },
+  southeast: { label: 'Southeast',          color: '#6a4620' },
+  northeast: { label: 'Northeast',          color: '#4a3478' },
+  intl:      { label: 'International',      color: '#386878' },
+};
+
+const TERRAIN_LIST = ['Alpine','Desert','Forest','Coastal','Canyon'];
+
+// TrailPeaches content links (confirmed from sitemap)
+const TP_LINKS = {
+  pct:  'https://www.trailpeaches.com/thru-hiking/pacific-crest-trail/',
+  cdt:  'https://www.trailpeaches.com/thru-hiking/hiking-the-continental-divide-trail/',
+  hdt:  'https://www.trailpeaches.com/thru-hiking/hdt/',
+  pnt:  'https://www.trailpeaches.com/thru-hiking/hiking-the-pacific-northwest-trail/',
+  azt:  'https://www.trailpeaches.com/thru-hiking/azt/',
+  jmt:  'https://www.trailpeaches.com/thru-hiking/the-john-muir-trail/',
+  trt:  'https://www.trailpeaches.com/thru-hiking/the-tahoe-rim-trail/',
+  ct:   'https://www.trailpeaches.com/thru-hiking/the-colorado-trail/',
+};
+
+const T = [
+  // ── Triple Crown ─────────────────────────────────────────────────────
+  { id:'pct',  name:'Pacific Crest Trail',        abbr:'PCT',    mi:2653, st:'CA · OR · WA',
+    reg:['pacific','northwest'], mind:120, maxd:180, mo:[4,5,6,7,8,9],
+    exp:4, rt:'linear', perm:true,  lot:true,  crowd:3, res:'moderate',
+    ter:['alpine','forest','desert'], farout:true, nav:2,
+    hook:'The benchmark American long trail. Desert to the High Sierra and the Cascades, a full season across three states.',
+    caltopo_u:'https://caltopo.com/m/7G155HC' },
+
+  { id:'cdt',  name:'Continental Divide Trail',    abbr:'CDT',    mi:3100, st:'MT · ID · WY · CO · NM',
+    reg:['rockies'], mind:130, maxd:200, mo:[5,6,7,8,9,10],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:2, res:'sparse',
+    ter:['alpine','desert','forest'], farout:true, nav:3,
+    hook:'The wild one. Alternates, route-finding, and the most remote stretches of any Triple Crown trail. Montana grizzlies to New Mexico desert.',
+    caltopo_u:'https://caltopo.com/m/B46BE0T' },
+
+  { id:'at',   name:'Appalachian Trail',           abbr:'AT',     mi:2190, st:'GA to ME (14 states)',
+    reg:['southeast','northeast'], mind:110, maxd:200, mo:[3,4,5,6,7,8,9,10],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:4, res:'frequent',
+    ter:['forest'], farout:true, nav:1,
+    hook:'The most-walked long trail in the world. Green tunnel, mountain towns, and an unbroken community of thru-hikers heading north.',
+    caltopo_u:'https://caltopo.com/m/2GKPR80' },
+
+  // ── National Scenic Trails (other) ───────────────────────────────────
+  { id:'pnt',  name:'Pacific Northwest Trail',     abbr:'PNT',    mi:1200, st:'MT · ID · WA',
+    reg:['northwest','rockies'], mind:60, maxd:90, mo:[7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine','forest','coastal'], farout:true, nav:3,
+    hook:"Glacier National Park to the Olympic Peninsula coast. Navigation-heavy, lightly-traveled, and genuinely remote.",
+    caltopo_u:'https://caltopo.com/m/UE4P28R' },
+
+  { id:'azt',  name:'Arizona Trail',               abbr:'AZT',    mi:800,  st:'AZ',
+    reg:['southwest'], mind:35, maxd:75, mo:[2,3,4,5,10,11],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['desert','alpine'], farout:true, nav:2,
+    hook:'Border to Utah through the full vertical range of Arizona: saguaro desert, ponderosa pine, and high sky island ranges.',
+    caltopo_u:'https://caltopo.com/m/L0MRKJ4' },
+
+  { id:'ft',   name:'Florida Trail',               abbr:'FT',     mi:1500, st:'FL',
+    reg:['southeast'], mind:60, maxd:100, mo:[11,12,1,2,3],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'frequent',
+    ter:['forest'], farout:true, nav:2,
+    hook:'Swamps, prairies, and pine flatwoods end-to-end. The flattest long trail in the US, physically accessible, mentally formidable.',
+    caltopo_u:'https://caltopo.com/m/0V7S' },
+
+  { id:'nct',  name:'North Country Trail',         abbr:'NCT',    mi:4800, st:'ND to NY (7 states)',
+    reg:['midwest','northeast'], mind:200, maxd:300, mo:[5,6,7,8,9,10],
+    exp:3, rt:'network', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest'], farout:true, nav:3,
+    hook:'The longest trail in the US national trail system. Already walkable end-to-end and nearly unpeopled, the frontier thru-hike.',
+    caltopo_u:'https://caltopo.com/m/S74D' },
+
+  { id:'iat',  name:'Ice Age Trail',               abbr:'IAT',    mi:1200, st:'WI',
+    reg:['midwest'], mind:60, maxd:100, mo:[4,5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'frequent',
+    ter:['forest'], farout:true, nav:3,
+    hook:"Traces Wisconsin's glacial moraines end-to-end. Low elevation, rural, and genuinely underrated, the anti-hype long trail.",
+    caltopo_u:'https://caltopo.com/m/9LLT' },
+
+  { id:'net',  name:'New England Trail',           abbr:'NET',    mi:215,  st:'CT · MA',
+    reg:['northeast'], mind:14, maxd:22, mo:[4,5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'frequent',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Connecticut to New Hampshire through the Metacomet and Monadnock ridges. Accessible, underestimated, and worth doing.',
+    caltopo_u:'https://caltopo.com/m/35BHP' },
+
+  { id:'pht',  name:'Potomac Heritage Trail',      abbr:'PHT',    mi:710,  st:'VA · MD · PA · DC',
+    reg:['southeast','northeast'], mind:35, maxd:70, mo:[4,5,6,7,8,9,10],
+    exp:2, rt:'network', perm:false, lot:false, crowd:2, res:'frequent',
+    ter:['forest'], farout:false, nav:2,
+    hook:'The unsung eastern NST following the Potomac River corridor from Pittsburgh to the Chesapeake. Trail and towpath through mid-Atlantic history.' },
+
+  { id:'ntt',  name:'Natchez Trace Trail',         abbr:'NTT',    mi:444,  st:'TN · AL · MS',
+    reg:['southeast'], mind:25, maxd:45, mo:[10,11,12,1,2,3,4],
+    exp:1, rt:'linear', perm:false, lot:false, crowd:2, res:'frequent',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Follows the historic Natchez Trace Parkway through the Deep South. Flat, accessible, and rich with Native American and frontier history.' },
+
+  // ── California ───────────────────────────────────────────────────────
+  { id:'jmt',  name:'John Muir Trail',             abbr:'JMT',    mi:211,  st:'CA',
+    reg:['pacific'], mind:17, maxd:25, mo:[7,8,9],
+    exp:3, rt:'linear', perm:true,  lot:true,  crowd:4, res:'sparse',
+    ter:['alpine'], farout:true, nav:2,
+    hook:'Yosemite to Whitney through the High Sierra. The most permit-contested trail in the US, apply March 1 or start from Whitney and flip.',
+    caltopo_u:'https://caltopo.com/m/H71FUJT' },
+
+  { id:'trt',  name:'Tahoe Rim Trail',             abbr:'TRT',    mi:165,  st:'CA · NV',
+    reg:['pacific'], mind:10, maxd:18, mo:[7,8,9,10],
+    exp:2, rt:'loop', perm:false, lot:false, crowd:3, res:'moderate',
+    ter:['alpine','forest'], farout:true, nav:2,
+    hook:'A full circumnavigation of Lake Tahoe at elevation. Strong town access and infrastructure, an ideal first long loop.',
+    caltopo_u:'https://caltopo.com/m/379J' },
+
+  { id:'hst',  name:'High Sierra Trail',           abbr:'HST',    mi:72,   st:'CA',
+    reg:['pacific'], mind:6, maxd:10, mo:[7,8,9],
+    exp:3, rt:'linear', perm:true,  lot:true,  crowd:3, res:'sparse',
+    ter:['alpine'], farout:true, nav:2,
+    hook:'Crescent Meadow to Whitney through the granite core of Sequoia. The most dramatic per-mile scenery of any California trail.',
+    caltopo_u:'https://caltopo.com/m/E727' },
+
+  { id:'tyt',  name:'Tahoe to Yosemite Trail',     abbr:'TYT',    mi:186,  st:'CA',
+    reg:['pacific'], mind:14, maxd:22, mo:[7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'sparse',
+    ter:['alpine'], farout:false, nav:3,
+    hook:'Connects two Sierra icons through the Emigrant Wilderness. Less crowded than the JMT with comparable High Sierra scenery.',
+    caltopo_u:'https://caltopo.com/m/5AMRV' },
+
+  { id:'tst',  name:'Theodore Solomons Trail',     abbr:'TST',    mi:271,  st:'CA',
+    reg:['pacific'], mind:20, maxd:35, mo:[7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine'], farout:false, nav:4,
+    hook:'Named for the man who first envisioned a high Sierra route, this backcountry alternative predates the JMT and covers more remote terrain north of it.',
+    caltopo_u:'https://caltopo.com/m/4BGSPP0' },
+
+  { id:'shr',  name:'Sierra High Route',           abbr:'SHR',    mi:195,  st:'CA',
+    reg:['pacific'], mind:18, maxd:28, mo:[7,8,9],
+    exp:4, rt:'linear', perm:true,  lot:false, crowd:1, res:'sparse',
+    ter:['alpine'], farout:false, nav:4,
+    hook:"Steve Roper's route above the JMT. Largely off-trail through granite basins and passes over 13,000 feet, a fundamentally different experience than its famous neighbor.",
+    caltopo_u:'https://caltopo.com/m/8DGL' },
+
+  { id:'bft',  name:'Bigfoot Trail',               abbr:'BFT',    mi:360,  st:'CA',
+    reg:['pacific'], mind:20, maxd:35, mo:[7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest','alpine'], farout:false, nav:3,
+    hook:"Northern California's forgotten mountains. Old-growth redwoods, Trinity Alps, Marble Mountains, and essentially no other hikers.",
+    caltopo_u:'https://caltopo.com/m/RV6D' },
+
+  { id:'lct',  name:'Lost Coast Trail',            abbr:'LCT',    mi:60,   st:'CA',
+    reg:['pacific'], mind:3, maxd:7, mo:[4,5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:true,  lot:false, crowd:2, res:'sparse',
+    ter:['coastal'], farout:true, nav:2,
+    hook:'The most remote coastline in the contiguous US. Tide-dependent beach travel through the King Range, black sand, and no roads for miles.',
+    caltopo_u:'https://caltopo.com/m/B2G0' },
+
+  { id:'cond', name:'Condor Trail',                abbr:'COND',   mi:400,  st:'CA',
+    reg:['pacific'], mind:25, maxd:45, mo:[4,5,10,11],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest','canyon'], farout:false, nav:3,
+    hook:'Through the remote heart of Los Padres National Forest, California condor habitat. Spring and fall only, with long dry stretches and the most committed solitude in Southern California.',
+    caltopo_u:'https://caltopo.com/m/1L0E2' },
+
+  // ── Pacific Northwest ─────────────────────────────────────────────────
+  { id:'oct',  name:'Oregon Coast Trail',          abbr:'OCT',    mi:382,  st:'OR',
+    reg:['pacific','northwest'], mind:25, maxd:40, mo:[5,6,7,8,9],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'frequent',
+    ter:['coastal','forest'], farout:true, nav:3,
+    hook:'Beach-to-beach down the entire Oregon coast. Tides, headlands, sea stacks, and small fishing towns.',
+    caltopo_u:'https://caltopo.com/m/QT1F' },
+
+  { id:'odt',  name:'Oregon Desert Trail',         abbr:'ODT',    mi:750,  st:'OR',
+    reg:['northwest'], mind:35, maxd:60, mo:[4,5,9,10],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['desert','alpine'], farout:false, nav:4,
+    hook:'An unmarked route through remote eastern Oregon. Steens Mountain, the Owyhee Canyonlands, and a week between supply points.',
+    caltopo_u:'https://caltopo.com/m/Q0KT' },
+
+  { id:'wt',   name:'Wonderland Trail',            abbr:'WT',     mi:93,   st:'WA',
+    reg:['northwest'], mind:7, maxd:14, mo:[7,8,9],
+    exp:2, rt:'loop', perm:true,  lot:false, crowd:3, res:'sparse',
+    ter:['alpine','forest'], farout:true, nav:2,
+    hook:'A full loop around Mount Rainier. Massive daily elevation swings through wildflower meadows and glacial river valleys.',
+    caltopo_u:'https://caltopo.com/m/B7GV' },
+
+  { id:'timb', name:'Timberline Trail',            abbr:'TIMB',   mi:40,   st:'OR',
+    reg:['northwest'], mind:3, maxd:5, mo:[7,8,9],
+    exp:2, rt:'loop', perm:false, lot:false, crowd:3, res:'sparse',
+    ter:['alpine','forest'], farout:false, nav:2,
+    hook:'A full circumnavigation of Mount Hood. Glaciers, wildflower basins, and river crossings in under a week, a Pacific Northwest classic.',
+    caltopo_u:'https://caltopo.com/m/NGTE' },
+
+  { id:'ict',  name:'Idaho Centennial Trail',      abbr:'ICT',    mi:996,  st:'ID',
+    reg:['northwest','rockies'], mind:60, maxd:90, mo:[7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine','forest'], farout:false, nav:3,
+    hook:'North to south through Idaho, crossing the Selway-Bitterroot and the Sawtooths. One of the highest concentrations of true wilderness in the lower 48.',
+    caltopo_u:'https://caltopo.com/m/G28M' },
+
+  // ── Rocky Mountains ───────────────────────────────────────────────────
+  { id:'ct',   name:'Colorado Trail',              abbr:'CT',     mi:486,  st:'CO',
+    reg:['rockies'], mind:25, maxd:45, mo:[7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:3, res:'moderate',
+    ter:['alpine','forest'], farout:true, nav:2,
+    hook:'Denver to Durango through eight wilderness areas. Consistently above 10,000 feet, strong infrastructure, approachable entry to long-distance hiking.',
+    caltopo_u:'https://caltopo.com/m/1443' },
+
+  { id:'tct',  name:'Teton Crest Trail',           abbr:'TCT',    mi:40,   st:'WY',
+    reg:['rockies'], mind:4, maxd:7, mo:[7,8,9],
+    exp:3, rt:'linear', perm:true,  lot:false, crowd:3, res:'sparse',
+    ter:['alpine'], farout:true, nav:2,
+    hook:'One of the most scenically concentrated routes in the US. Five days above the granite towers of Grand Teton National Park, permits fill fast.',
+    caltopo_u:'https://caltopo.com/m/CSHU' },
+
+  { id:'wrhr', name:'Wind River High Route',       abbr:'WRHR',   mi:80,   st:'WY',
+    reg:['rockies'], mind:7, maxd:14, mo:[7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine'], farout:false, nav:4,
+    hook:"Wyoming's most remote alpine country. Off-trail through the Wind River Range with glaciers, 13,000-foot passes, and essentially nobody else.",
+    caltopo_u:'https://caltopo.com/m/S7J2' },
+
+  { id:'uht',  name:'Uinta Highline Trail',        abbr:'UHT',    mi:104,  st:'UT',
+    reg:['rockies'], mind:8, maxd:14, mo:[7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'sparse',
+    ter:['alpine'], farout:false, nav:2,
+    hook:'A high-elevation traverse of the High Uintas Wilderness ending near Kings Peak. Above treeline for most of its length through Utah\'s most dramatic alpine country.',
+    caltopo_u:'https://caltopo.com/m/4JU2' },
+
+  // ── Southwest ──────────────────────────────────────────────────────────
+  { id:'hdt',  name:'Hayduke Trail',               abbr:'HDT',    mi:812,  st:'UT · AZ',
+    reg:['southwest'], mind:55, maxd:90, mo:[3,4,5],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['canyon','desert'], farout:true, nav:4,
+    hook:"Utah canyon country end-to-end. More off-trail than on. Six national parks, extreme route-finding, zero trail culture. Spring only.",
+    caltopo_u:'https://caltopo.com/m/AE037P4' },
+
+  { id:'get',  name:'Grand Enchantment Trail',     abbr:'GET',    mi:770,  st:'AZ · NM',
+    reg:['southwest'], mind:45, maxd:75, mo:[3,4,5,10,11],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['desert','alpine','canyon'], farout:false, nav:4,
+    hook:'Phoenix to Albuquerque through sky islands, Mogollon Rim, and Gila Wilderness. Route-finding through the most diverse desert terrain in the Southwest.',
+    caltopo_u:'https://caltopo.com/m/MQJ3M' },
+
+  // ── Midwest ────────────────────────────────────────────────────────────
+  { id:'sht',  name:'Superior Hiking Trail',       abbr:'SHT',    mi:310,  st:'MN',
+    reg:['midwest'], mind:18, maxd:28, mo:[5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['forest'], farout:true, nav:2,
+    hook:'The north shore of Lake Superior from Duluth to the Canadian border. Ridge walking above one of the world\'s great bodies of water.',
+    caltopo_u:'https://caltopo.com/m/4L6C' },
+
+  { id:'ozt',  name:'Ozark Trail',                 abbr:'OZT',    mi:360,  st:'MO',
+    reg:['midwest'], mind:20, maxd:35, mo:[10,11,12,1,2,3,4],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Through Missouri\'s Ozark highlands near St. Louis toward the Arkansas border. Clear spring-fed rivers, karst bluffs, and deep solitude.',
+    caltopo_u:'https://caltopo.com/m/KEQ0' },
+
+  { id:'bkt',  name:'Buckeye Trail',               abbr:'BKT',    mi:1444, st:'OH',
+    reg:['midwest'], mind:80, maxd:130, mo:[4,5,6,7,8,9,10],
+    exp:2, rt:'loop', perm:false, lot:false, crowd:1, res:'frequent',
+    ter:['forest'], farout:false, nav:2,
+    hook:'A full loop around the state of Ohio connecting natural areas and state parks. The longest Midwestern trail most people have never heard of.',
+    caltopo_u:'https://caltopo.com/m/UAR0MU0' },
+
+  { id:'bhct', name:'Black Hills Centennial Trail', abbr:'BHCT',  mi:111,  st:'SD',
+    reg:['midwest'], mind:7, maxd:12, mo:[5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['forest','alpine'], farout:false, nav:2,
+    hook:'Through the granite spires and ponderosa pine of the South Dakota Black Hills. An accessible introduction to long-distance hiking in the Northern Plains.' },
+
+  { id:'mdh',  name:'Maah Daah Hey Trail',         abbr:'MDH',    mi:144,  st:'ND',
+    reg:['midwest'], mind:8, maxd:14, mo:[5,6,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['desert'], farout:false, nav:2,
+    hook:'Through North Dakota badlands adjacent to Theodore Roosevelt National Park. Bison, prairie dogs, and formations that look like a different planet.',
+    caltopo_u:'https://caltopo.com/m/R9FJT' },
+
+  { id:'mists', name:'Michigan Shore-to-Shore Trail', abbr:'MSST', mi:220, st:'MI',
+    reg:['midwest'], mind:14, maxd:22, mo:[5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Lake Michigan to Lake Huron across the northern Lower Peninsula. Through state forests, dunes, and river valleys, shared with equestrians.' },
+
+  // ── Southeast ──────────────────────────────────────────────────────────
+  { id:'ot',   name:'Ouachita Trail',              abbr:'OT',     mi:223,  st:'AR · OK',
+    reg:['southeast'], mind:12, maxd:22, mo:[10,11,12,1,2,3,4],
+    exp:1, rt:'linear', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest'], farout:true, nav:2,
+    hook:'The most underestimated trail in the South. Dense Ouachita hardwood forest, near-zero crowds, growing thru-hiker community.',
+    caltopo_u:'https://caltopo.com/m/A69DN' },
+
+  { id:'bmt',  name:'Benton MacKaye Trail',        abbr:'BMT',    mi:300,  st:'GA · TN · NC',
+    reg:['southeast'], mind:18, maxd:28, mo:[3,4,5,10,11],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'The southern Appalachian alternative to the AT without the crowds. Quieter country and a genuine sense of solitude.',
+    caltopo_u:'https://caltopo.com/m/8J03' },
+
+  { id:'pinhoti', name:'Pinhoti Trail',            abbr:'PINHOTI', mi:335, st:'AL · GA',
+    reg:['southeast'], mind:20, maxd:32, mo:[3,4,10,11,12],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:true, nav:2,
+    hook:'Alabama to Georgia through the Talladega and Chattahoochee forests. Connects into the AT, an obscure but complete thru-hiking experience.',
+    caltopo_u:'https://caltopo.com/m/2TJP' },
+
+  { id:'oht',  name:'Ozark Highlands Trail',       abbr:'OHT',    mi:218,  st:'AR',
+    reg:['southeast'], mind:14, maxd:22, mo:[10,11,12,1,2,3,4],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:"The best trail nobody's heard of. Creek crossings, limestone bluffs, and hardwood forest through Buffalo National River country.",
+    caltopo_u:'https://caltopo.com/m/4PRT' },
+
+  { id:'lsht', name:'Lone Star Hiking Trail',      abbr:'LSHT',   mi:128,  st:'TX',
+    reg:['southeast'], mind:7, maxd:14, mo:[11,12,1,2,3],
+    exp:1, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:true, nav:2,
+    hook:'The longest trail in Texas, through Sam Houston National Forest. A winter getaway with near-zero crowds and easy logistics.',
+    caltopo_u:'https://caltopo.com/m/CE4A' },
+
+  { id:'mst',  name:'Mountains-to-Sea Trail',      abbr:'MST',    mi:1175, st:'NC',
+    reg:['southeast'], mind:60, maxd:100, mo:[4,5,6,7,8,9,10],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['forest','coastal'], farout:false, nav:2,
+    hook:'Great Smoky Mountains to the Outer Banks coast. One of the longest single-state trails, spanning the entire breadth of North Carolina.',
+    caltopo_u:'https://caltopo.com/m/GSQA' },
+
+  { id:'cumt', name:'Cumberland Trail',            abbr:'CUMT',   mi:175,  st:'TN',
+    reg:['southeast'], mind:10, maxd:18, mo:[3,4,5,9,10,11],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest','canyon'], farout:false, nav:2,
+    hook:'Through the Cumberland Plateau from the Tennessee River toward the Virginia border. Canyon scenery, waterfalls, and sandstone bluffs in a region most hikers overlook.' },
+
+  { id:'allt', name:'Allegheny Trail',             abbr:'ALT',    mi:311,  st:'WV',
+    reg:['southeast'], mind:20, maxd:30, mo:[4,5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'A north-south traverse of West Virginia through the Monongahela National Forest. Dense Appalachian hardwood, spruce ridges, and a level of solitude rare on east coast trails.',
+    caltopo_u:'https://caltopo.com/m/J2NA' },
+
+  { id:'btr',  name:'Bartram Trail',               abbr:'BTR',    mi:115,  st:'GA · NC',
+    reg:['southeast'], mind:7, maxd:12, mo:[3,4,5,9,10,11],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Following the 18th-century botanist\'s path through southern Blue Ridge forests. Short enough for a week, wild enough to feel remote.',
+    caltopo_u:'https://caltopo.com/m/2J44' },
+
+  { id:'plt',  name:'Palmetto Trail',              abbr:'PLT',    mi:425,  st:'SC',
+    reg:['southeast'], mind:30, maxd:50, mo:[10,11,12,1,2,3],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest','coastal'], farout:false, nav:2,
+    hook:'Appalachian foothills to the Atlantic coast across South Carolina. A trail in the making with outstanding sections and creative logistics.',
+    caltopo_u:'https://caltopo.com/m/8NBE' },
+
+  { id:'fht',  name:'Foothills Trail',             abbr:'FHT',    mi:77,   st:'SC · NC',
+    reg:['southeast'], mind:5, maxd:9, mo:[3,4,5,9,10,11],
+    exp:1, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Through the Blue Ridge escarpment of the Carolina Upstate. Short enough for a first backpacking trip, rewarding enough to repeat.',
+    caltopo_u:'https://caltopo.com/m/K5KRJCA' },
+
+  { id:'tusc', name:'Tuscarora Trail',             abbr:'TUSC',   mi:252,  st:'PA · MD · VA · WV',
+    reg:['southeast','northeast'], mind:15, maxd:25, mo:[4,5,6,9,10,11],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'The Appalachian Trail\'s western shadow. Runs parallel to the AT through the ridge-and-valley country of Pennsylvania and Virginia with a fraction of the foot traffic.' },
+
+  // ── Northeast ──────────────────────────────────────────────────────────
+  { id:'lt',   name:'Long Trail',                  abbr:'LT',     mi:273,  st:'VT',
+    reg:['northeast'], mind:18, maxd:28, mo:[6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['forest'], farout:true, nav:2,
+    hook:'The oldest long trail in the US. Rugged New England ridgeline walking with GMC shelters throughout.',
+    caltopo_u:'https://caltopo.com/m/0MU4' },
+
+  { id:'flt',  name:'Finger Lakes Trail',          abbr:'FLT',    mi:580,  st:'NY',
+    reg:['northeast'], mind:35, maxd:55, mo:[5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Western New York from the Catskills to Lake Erie through gorges, vineyards, and farmland. Genuinely underrated.',
+    caltopo_u:'https://caltopo.com/m/93LT' },
+
+  { id:'lonp', name:'Long Path',                   abbr:'LP',     mi:347,  st:'NY · NJ',
+    reg:['northeast'], mind:20, maxd:32, mo:[5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['forest','alpine'], farout:false, nav:2,
+    hook:"George Washington Bridge north through the Catskills to the Adirondack foothills. New York's own long trail, largely unknown outside the state." },
+
+  { id:'npt',  name:'Northville-Placid Trail',     abbr:'NPT',    mi:138,  st:'NY',
+    reg:['northeast'], mind:10, maxd:14, mo:[6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'The classic Adirondack route from Northville to Lake Placid. Low-elevation backcountry through old-growth forest and lake country, a rite of passage for Adirondack hikers.',
+    caltopo_u:'https://caltopo.com/m/8CRT' },
+
+  { id:'mstp', name:'Mid State Trail',             abbr:'MST-PA', mi:327,  st:'PA',
+    reg:['northeast'], mind:20, maxd:32, mo:[4,5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest'], farout:false, nav:2,
+    hook:"Pennsylvania's backbone trail running north-south through the central ridge-and-valley country. Connects to both the AT and the North Country Trail.",
+    caltopo_u:'https://caltopo.com/m/AL2M' },
+
+  { id:'cohos', name:'Cohos Trail',                abbr:'COHOS',  mi:162,  st:'NH',
+    reg:['northeast'], mind:12, maxd:20, mo:[6,7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine','forest'], farout:false, nav:3,
+    hook:'The wildest trail in New Hampshire, north through Cohos country to the Canadian border. Barely maintained, genuinely remote.',
+    caltopo_u:'https://caltopo.com/m/0FJQ' },
+
+  { id:'appn', name:'International Appalachian Trail', abbr:'IAT-N', mi:1900, st:'ME · QC · NB · NL',
+    reg:['northeast','intl'], intl:true, mind:80, maxd:130, mo:[6,7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:1, res:'moderate',
+    ter:['forest','alpine','coastal'], farout:false, nav:2,
+    hook:'The Appalachian Trail extended to its geological conclusion at the tip of Newfoundland. Where the AT\'s underlying mountain chain finally meets the sea.' },
+
+  // ── South / Other ──────────────────────────────────────────────────────
+  { id:'st',   name:'Sheltowee Trace',             abbr:'ST',     mi:333,  st:'KY · TN',
+    reg:['southeast'], mind:20, maxd:32, mo:[3,4,5,9,10,11],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['forest'], farout:false, nav:2,
+    hook:'Through the Daniel Boone National Forest and Big South Fork. One of the most overlooked trails in the eastern US.',
+    caltopo_u:'https://caltopo.com/m/B21V' },
+
+  { id:'akt',  name:'Ala Kahakai Trail',           abbr:'AKT',    mi:175,  st:'HI (Big Island)',
+    reg:['pacific'], mind:12, maxd:20, mo:[1,2,3,4,5,6,7,8,9,10,11,12],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['coastal'], farout:false, nav:3,
+    hook:"The Big Island's ancient coastal path. Lava fields, fishponds, petroglyphs, and black-sand beaches. Year-round hiking." },
+
+  // ── Canada ─────────────────────────────────────────────────────────────
+  { id:'wct',  name:'West Coast Trail',            abbr:'WCT',    mi:47,   st:'British Columbia',
+    reg:['northwest'], intl:true, mind:5, maxd:9, mo:[5,6,7,8,9],
+    exp:3, rt:'linear', perm:true,  lot:false, crowd:3, res:'sparse',
+    ter:['coastal','forest'], farout:true, nav:2,
+    hook:'Wild Pacific coastline on Vancouver Island. Ladders, surge channels, old-growth Sitka spruce, the most dramatic coastal trail in North America.',
+    caltopo_u:'https://caltopo.com/m/JGV0' },
+
+  { id:'gdt',  name:'Great Divide Trail',          abbr:'GDT',    mi:745,  st:'Alberta · British Columbia',
+    reg:['intl'], intl:true, mind:50, maxd:80, mo:[7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine','forest'], farout:false, nav:3,
+    hook:"Canada's answer to the CDT. The Canadian Rockies along the continental divide, massive scenery, grizzly country, and a fraction of the thru-hiker traffic.",
+    caltopo_u:'https://caltopo.com/m/G9MEA' },
+
+  // ── New Zealand ────────────────────────────────────────────────────────
+  { id:'ta',   name:'Te Araroa',                   abbr:'TA',     mi:1860, st:'New Zealand',
+    reg:['intl'], intl:true, mind:100, maxd:160, mo:[10,11,12,1,2,3],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['alpine','coastal','forest'], farout:false, nav:3,
+    hook:'The length of New Zealand from Cape Reinga to Bluff. Beach walking, volcanic plateau, and the Southern Alps, the thru-hike of the Southern Hemisphere.',
+    caltopo_u:'https://caltopo.com/m/LV0Q' },
+
+  { id:'rwt',  name:'Routeburn Track',             abbr:'RBTRK',  mi:20,   st:'New Zealand',
+    reg:['intl'], intl:true, mind:3, maxd:5, mo:[11,12,1,2,3,4],
+    exp:2, rt:'linear', perm:true,  lot:false, crowd:3, res:'sparse',
+    ter:['alpine','forest'], farout:true, nav:1,
+    hook:"One of New Zealand's Great Walks. Alpine passes, fiord-country valleys, and a full hut system, an approachable international adventure.",
+    caltopo_u:'https://caltopo.com/m/6USBH14' },
+
+  // ── Europe: Alps ────────────────────────────────────────────────────────
+  { id:'tmb',  name:'Tour du Mont Blanc',          abbr:'TMB',    mi:110,  st:'France · Italy · Switzerland',
+    reg:['intl'], intl:true, mind:8, maxd:14, mo:[6,7,8,9],
+    exp:2, rt:'loop', perm:false, lot:false, crowd:4, res:'frequent',
+    ter:['alpine'], farout:true, nav:2,
+    hook:'A full circumnavigation of the Mont Blanc massif through three countries. Huts, villages, and celebrated mountain scenery throughout.',
+    caltopo_u:'https://caltopo.com/m/1CHB67E' },
+
+  { id:'whr',  name:"Walker's Haute Route",        abbr:'WHR',    mi:125,  st:'Switzerland · France',
+    reg:['intl'], intl:true, mind:12, maxd:18, mo:[7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:3, res:'frequent',
+    ter:['alpine'], farout:false, nav:2,
+    hook:'Chamonix to Zermatt on foot, the classic Alpine high route. Matterhorn views, Swiss huts, and the most celebrated long walk in Europe.',
+    caltopo_u:'https://caltopo.com/m/2S0U' },
+
+  { id:'var',  name:'Via Alpina Red Route',        abbr:'VAR',    mi:1550, st:'Monaco to Trieste (8 countries)',
+    reg:['intl'], intl:true, mind:110, maxd:160, mo:[7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'frequent',
+    ter:['alpine'], farout:false, nav:2,
+    hook:'Monaco to Trieste through the full width of the Alps. The grandest Alpine traverse, huts and glacier crossings across eight countries.',
+    caltopo_u:'https://caltopo.com/m/AG14TQU' },
+
+  // ── Europe: Pyrenees ────────────────────────────────────────────────────
+  { id:'hrp',  name:'Pyrenees High Route',         abbr:'HRP',    mi:497,  st:'France · Spain · Andorra',
+    reg:['intl'], intl:true, mind:40, maxd:55, mo:[7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['alpine'], farout:false, nav:4,
+    hook:"The technical spine of the Pyrenees. Permanent snowfields, knife ridges, and unmarked cols, Europe's most demanding long route.",
+    caltopo_u:'https://caltopo.com/m/826RE' },
+
+  { id:'gr10', name:'GR 10',                       abbr:'GR10',   mi:540,  st:'France',
+    reg:['intl'], intl:true, mind:40, maxd:60, mo:[6,7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['alpine','forest'], farout:false, nav:1,
+    hook:'The well-marked French side of the Pyrenees. Atlantic to Mediterranean through villages, mountain huts, and Basque country.',
+    caltopo_u:'https://caltopo.com/m/SC47' },
+
+  { id:'gr11', name:'GR 11',                       abbr:'GR11',   mi:520,  st:'Spain',
+    reg:['intl'], intl:true, mind:40, maxd:55, mo:[6,7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['alpine','forest'], farout:false, nav:1,
+    hook:'The Spanish side of the Pyrenees, Atlantic to Mediterranean. Less crowded than the GR10 but more committing, with longer stretches between resupply.',
+    caltopo_u:'https://caltopo.com/m/DURH' },
+
+  // ── Europe: Mediterranean / Corsica ────────────────────────────────────
+  { id:'gr20', name:'GR 20',                       abbr:'GR20',   mi:112,  st:'Corsica, France',
+    reg:['intl'], intl:true, mind:10, maxd:16, mo:[6,7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:3, res:'moderate',
+    ter:['alpine'], farout:false, nav:2,
+    hook:'Considered the most beautiful long trail in Europe. Sustained technical scrambling through the granite spine of Corsica.',
+    caltopo_u:'https://caltopo.com/m/9083T' },
+
+  // ── Europe: UK ──────────────────────────────────────────────────────────
+  { id:'pennw', name:'Pennine Way',                abbr:'PENNW',  mi:268,  st:'England, UK',
+    reg:['intl'], intl:true, mind:14, maxd:21, mo:[4,5,6,7,8,9],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:3, res:'frequent',
+    ter:['alpine','forest'], farout:false, nav:2,
+    hook:'England\'s original long trail, through its spine from the Peak District to the Scottish border. Boggy moorland, limestone dales, and village pubs since 1965.',
+    caltopo_u:'https://caltopo.com/m/8UCR' },
+
+  { id:'cwt',  name:'Cape Wrath Trail',            abbr:'CWT',    mi:230,  st:'Scotland, UK',
+    reg:['intl'], intl:true, mind:14, maxd:21, mo:[5,6,7,8,9],
+    exp:4, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine','forest','coastal'], farout:false, nav:4,
+    hook:'Fort William to the most remote point on the British mainland. No official route, no waymarks. Remote Scottish Highlands at their most uncompromising.',
+    caltopo_u:'https://caltopo.com/m/EBBU36P' },
+
+  { id:'whw',  name:'West Highland Way',           abbr:'WHW',    mi:96,   st:'Scotland, UK',
+    reg:['intl'], intl:true, mind:6, maxd:10, mo:[4,5,6,7,8,9,10],
+    exp:1, rt:'linear', perm:false, lot:false, crowd:4, res:'frequent',
+    ter:['forest','alpine'], farout:false, nav:1,
+    hook:"Glasgow to Fort William through Loch Lomond and the Scottish Highlands. Europe's most popular long trail and the best introduction to wilderness walking.",
+    caltopo_u:'https://caltopo.com/m/0QVKS' },
+
+  { id:'swcp', name:'South West Coast Path',       abbr:'SWCP',   mi:630,  st:'England, UK',
+    reg:['intl'], intl:true, mind:40, maxd:70, mo:[3,4,5,6,7,8,9,10],
+    exp:2, rt:'linear', perm:false, lot:false, crowd:3, res:'frequent',
+    ter:['coastal'], farout:false, nav:1,
+    hook:'The longest national trail in England. Somerset to Dorset along the entire southwest peninsula coastline, cliffs, fishing harbors, and standing stones.',
+    caltopo_u:'https://caltopo.com/m/UB5AN' },
+
+  // ── Europe: Spain ──────────────────────────────────────────────────────
+  { id:'camino', name:'Camino de Santiago',        abbr:'CAMINO', mi:490,  st:'France · Spain',
+    reg:['intl'], intl:true, mind:30, maxd:40, mo:[3,4,5,6,9,10],
+    exp:1, rt:'linear', perm:false, lot:false, crowd:4, res:'frequent',
+    ter:['forest'], farout:false, nav:1,
+    hook:'The classic medieval pilgrimage from the French Pyrenees to Santiago. Marked by yellow arrows, dense infrastructure, and a global community of walkers.',
+    caltopo_u:'https://caltopo.com/m/1GV1L' },
+
+  // ── Middle East / Asia ──────────────────────────────────────────────────
+  { id:'isr',  name:'Israel National Trail',       abbr:'INT',    mi:680,  st:'Israel',
+    reg:['intl'], intl:true, mind:40, maxd:60, mo:[10,11,12,1,2,3],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:2, res:'moderate',
+    ter:['desert','forest','coastal'], farout:true, nav:2,
+    hook:'Dan to Eilat through the entire length of Israel. Desert, Mediterranean forest, and the Negev, an unexpectedly rich thru-hiking destination.' },
+
+  { id:'ac',   name:'Annapurna Circuit',           abbr:'AC',     mi:128,  st:'Nepal',
+    reg:['intl'], intl:true, mind:12, maxd:20, mo:[3,4,5,10,11],
+    exp:2, rt:'loop', perm:true,  lot:false, crowd:3, res:'frequent',
+    ter:['alpine','canyon'], farout:false, nav:1,
+    hook:'The classic Himalayan circuit. Kali Gandaki Gorge, Thorong La pass at 17,769 feet, and teahouse culture through one of the world\'s great mountain landscapes.',
+    caltopo_u:'https://caltopo.com/m/8N6HDFK' },
+
+  // ── Oceania ──────────────────────────────────────────────────────────────
+  { id:'lara', name:'Larapinta Trail',             abbr:'LARA',   mi:139,  st:'NT, Australia',
+    reg:['intl'], intl:true, mind:10, maxd:18, mo:[4,5,6,7,8,9],
+    exp:3, rt:'linear', perm:true,  lot:false, crowd:2, res:'sparse',
+    ter:['desert','canyon'], farout:false, nav:2,
+    hook:'Through the West MacDonnell Ranges of the Australian outback. Ancient gorges, Aboriginal sacred sites, and some of the most remote desert walking accessible from a major international airport.',
+    caltopo_u:'https://caltopo.com/m/80LVA5M' },
+
+  // ── South America ──────────────────────────────────────────────────────
+  { id:'tdp',  name:'Torres del Paine O Circuit',  abbr:'TDP',    mi:80,   st:'Chile',
+    reg:['intl'], intl:true, mind:8, maxd:12, mo:[11,12,1,2,3],
+    exp:3, rt:'loop', perm:true,  lot:false, crowd:3, res:'moderate',
+    ter:['alpine','forest'], farout:false, nav:2,
+    hook:"The full circuit of Patagonia's most dramatic peaks. Granite towers, Patagonian wind, and glaciers, the bucket-list loop of the Southern Hemisphere.",
+    caltopo_u:'https://caltopo.com/m/G94B' },
+
+  // ── Caucasus ───────────────────────────────────────────────────────────
+  { id:'tcat', name:'Transcaucasian Trail',        abbr:'TCAT',   mi:750,  st:'Georgia · Armenia',
+    reg:['intl'], intl:true, mind:50, maxd:80, mo:[6,7,8,9],
+    exp:3, rt:'linear', perm:false, lot:false, crowd:1, res:'sparse',
+    ter:['alpine','forest'], farout:false, nav:3,
+    hook:'The Greater Caucasus traversed end to end through Georgia and Armenia. Ancient monasteries, Caucasian villages, and remote alpine terrain still being trail-built.',
+    caltopo_u:'https://caltopo.com/m/VERSK' },
+];
+
+// ── STATE ────────────────────────────────────
+let S = {
+  days:21, exp:3, months:[], regions:[], terrain:[],
+  navPref:'any', farout:false,
+  noLot:false, noPerm:false, remote:false, loop:false, intl:true,
+};
+
+// ── PACE TABLE ───────────────────────────────
+// Base miles/day by exp level (1-4), adjusted for nav difficulty (1-4)
+const BASE_MPD  = [0, 10, 14, 18, 23];
+const NAV_PACE  = [0, 1.08, 1.0, 0.68, 0.50];
+
+function calcDays(t, exp) {
+  // How long this trail realistically takes at your pace.
+  // Clamped to the trail's researched range: mind/maxd already account for
+  // elevation gain, hut stages, altitude and resupply, none of which a
+  // miles-per-day figure can see. Pace sets where in that range you land.
+  const mpd = BASE_MPD[exp] * NAV_PACE[t.nav];
+  const raw = t.mi / mpd;
+  return Math.round(Math.min(t.maxd, Math.max(t.mind, raw)));
+}
+
+// ── SCORING ──────────────────────────────────
+function score(t) {
+  if (!S.intl && t.intl) return -999;
+  let s = 0;
+  const d = S.days;
+
+  // Days (0-35): based on pace × difficulty, not static trail data
+  const needed = calcDays(t, S.exp);
+  const ratio  = d / needed;
+  if (ratio < 0.50) return -999;            // can't do a meaningful section
+  if (ratio >= 0.85 && ratio <= 2.0) {
+    s += 35;                                // sweet spot: fits or have room
+  } else if (ratio > 2.0) {
+    s += 27;                                // plenty of time, slight demerit
+  } else {
+    // 0.50-0.84 = section territory, steep curve
+    s += Math.round(35 * Math.pow((ratio - 0.50) / 0.35, 1.7) * 0.38);
+  }
+
+  // Experience (0-30 or penalty)
+  const ed = S.exp - t.exp;
+  if (ed >= 0) s += ed === 0 ? 30 : ed === 1 ? 24 : 14;
+  else s += ed === -1 ? 3 : -25;
+
+  // Season (0-20). Hard filter: out of season means out of results.
+  if (S.months.length) {
+    const ov = t.mo.filter(m => S.months.includes(m)).length;
+    if (ov === 0) return -999;            // not hikeable in any month you picked
+    s += 20 * (ov / S.months.length);
+  } else { s += 10; }
+
+  // Region (0-15 or -5)
+  if (S.regions.length) {
+    s += t.reg.some(r => S.regions.includes(r)) ? 15 : -5;
+  }
+
+  // Terrain. Hard filter: clicking a chip is a request, not a hint.
+  // Any match qualifies, extra matches rank higher (+5 each, max 15).
+  if (S.terrain.length) {
+    const want = S.terrain.map(x => x.toLowerCase());
+    const hits = t.ter.filter(x => want.includes(x.toLowerCase())).length;
+    if (hits === 0) return -999;
+    s += Math.min(hits * 5, 15);
+  }
+
+  // Navigation style
+  if (S.navPref === 'marked') {
+    if (t.nav === 3) s -= 15;
+    if (t.nav === 4) s -= 30;
+  } else if (S.navPref === 'wild') {
+    if (t.nav === 3) s += 5;
+    if (t.nav === 4) s += 10;
+  }
+
+  // FarOut preference
+  if (S.farout && !t.farout) s -= 15;
+
+  // Options
+  if (S.noLot  && t.lot)          s -= 18;
+  if (S.noPerm && t.perm)         s -= 14;
+  if (S.remote && t.crowd >= 4)   s -= 14;
+  if (S.remote && t.crowd >= 3)   s -= 6;
+  if (S.remote && t.crowd === 1)  s += 5;
+  if (S.loop   && t.rt !== 'loop') s -= 10;
+
+  return s;
+}
+
+function isSection(t) { return S.days < calcDays(t, S.exp) * 0.88; }
+
+// ── SEASON FORMATTING ────────────────────────
+const MO_AB = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function seasonStr(mo) {
+  if (mo.length >= 11) return 'Year-round';
+  const set = new Set(mo);
+  // start just after a gap so winter ranges (Nov-Mar) read as one run
+  let start = null;
+  for (let m = 1; m <= 12; m++) {
+    if (set.has(m) && !set.has(m === 1 ? 12 : m - 1)) { start = m; break; }
+  }
+  if (start === null) return '';
+  const runs = [];
+  let len = 0, runStart = start;
+  for (let i = 0; i <= 12; i++) {
+    const m = ((start - 1 + i) % 12) + 1;
+    if (i < 12 && set.has(m)) {
+      if (len === 0) runStart = m;
+      len++;
+    } else if (len) {
+      const end = ((runStart - 1 + len - 1) % 12) + 1;
+      runs.push(len === 1 ? MO_AB[runStart] : MO_AB[runStart] + '-' + MO_AB[end]);
+      len = 0;
+    }
+  }
+  return runs.join(', ');
+}
+
+// ── RENDER ───────────────────────────────────
+function render() {
+  const scored = T
+    .map(t => ({ t, s: score(t) }))
+    .filter(x => x.s > 0)
+    .sort((a, b) => b.s - a.s);
+
+  const maxS = scored.length ? scored[0].s : 1;
+
+  document.getElementById('res-count').textContent =
+    `${scored.length} trail${scored.length !== 1 ? 's' : ''} matched`;
+  document.getElementById('hd-count').textContent =
+    scored.length ? `${scored.length} / ${T.length}` : '';
+
+  const list = document.getElementById('res-list');
+
+  if (!scored.length) {
+    list.innerHTML = `<div class="empty">
+      <div class="empty-title">No matches</div>
+      <p>Try loosening your filters, fewer months selected or a broader region usually helps.</p>
+    </div>`;
+    return;
+  }
+
+  const CROWD = ['','Remote','Light','Moderate','Busy'];
+  const NAV_LABEL = ['','Well-signed','','Route-finding','Off-trail'];
+  const NAV_CLASS = ['','tag-nav-signed','','tag-nav-route','tag-nav-wild'];
+
+  list.innerHTML = scored.map(({ t, s }) => {
+    const pct = Math.round((s / maxS) * 100);
+    const reg0 = t.reg[0];
+    const regColor = REGIONS[reg0]?.color || '#555';
+    const regLabel = REGIONS[reg0]?.label || reg0;
+    const needed = calcDays(t, S.exp);
+    const days = `~${needed}d`;           // pace-adjusted estimate for current hiker level
+    const sec = isSection(t);
+    const navLbl = NAV_LABEL[t.nav] || '';
+    const navCls = NAV_CLASS[t.nav] || '';
+    const tplink = TP_LINKS[t.id] || null;
+
+    const tags = [
+      `<span class="tag tag-region" style="background:${regColor}">${regLabel}</span>`,
+      ...t.ter.map(te => `<span class="tag tag-terrain">${te}</span>`),
+      t.rt === 'loop' ? `<span class="tag tag-loop">Loop</span>` : '',
+      t.lot ? `<span class="tag tag-permit">Permit lottery</span>` :
+        t.perm ? `<span class="tag tag-permit">Permit required</span>` : '',
+      sec ? `<span class="tag tag-section">Section hike</span>` : '',
+      (t.intl && t.reg[0] !== 'intl') ? `<span class="tag tag-intl">International</span>` : '',
+      navLbl ? `<span class="tag ${navCls}">${navLbl}</span>` : '',
+      t.farout ? `<span class="tag tag-farout">FarOut</span>` : '',
+    ].filter(Boolean).join('');
+
+    const trailSlug = t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/, '');
+    const footLink = tplink
+      ? `<a href="${tplink}" class="card-link card-link-tp" target="_blank" rel="noopener noreferrer">Read on TrailPeaches &#8599;</a>`
+      : `<a href="/trails/${trailSlug}/" class="card-link" target="_blank" rel="noopener noreferrer">Trail info &#8599;</a>`;
+    const caltopoLink = t.caltopo_u
+      ? `<a href="${t.caltopo_u}" class="card-link card-link-caltopo" target="_blank" rel="noopener noreferrer">View route on CalTopo &#8599;</a>`
+      : '';
+
+    return `<article class="card">
+      <div class="card-top">
+        <div class="card-left">
+          <div class="trail-name">${t.name}</div>
+          <div class="trail-states">${t.st}</div>
+        </div>
+        <div class="card-right">
+          <div class="match-pct">${pct}%</div>
+          <div class="match-lbl">match</div>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="stats">
+        <div class="st"><span class="st-val">${t.mi.toLocaleString()}</span><span class="st-lbl">miles</span></div>
+        <div class="st"><span class="st-val">${days}</span><span class="st-lbl">typical</span></div>
+        <div class="st"><span class="st-val">${seasonStr(t.mo)}</span><span class="st-lbl">season</span></div>
+        <div class="st"><span class="st-val">${CROWD[t.crowd]}</span><span class="st-lbl">crowds</span></div>
+      </div>
+      <div class="tags">${tags}</div>
+      <p class="hook">${t.hook}</p>
+      <div class="card-foot">${footLink}${caltopoLink ? '<span class="foot-sep">&middot;</span>' + caltopoLink : ''}</div>
+    </article>`;
+  }).join('');
+}
+
+// ── WIRE CONTROLS ────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const mg = document.getElementById('month-grid');
+MONTHS.forEach((m, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'mo-btn';
+  btn.textContent = m;
+  btn.addEventListener('click', () => {
+    const mo = i + 1;
+    if (S.months.includes(mo)) { S.months = S.months.filter(x => x !== mo); btn.classList.remove('on'); }
+    else { S.months.push(mo); btn.classList.add('on'); }
+    render();
+  });
+  mg.appendChild(btn);
+});
+
+const rl = document.getElementById('region-list');
+Object.entries(REGIONS).forEach(([key, def]) => {
+  const label = document.createElement('label');
+  label.className = 'rg-item';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.addEventListener('change', () => {
+    if (cb.checked) S.regions.push(key);
+    else S.regions = S.regions.filter(r => r !== key);
+    render();
+  });
+  const blaze = document.createElement('div');
+  blaze.className = 'rg-blaze';
+  blaze.style.background = def.color;
+  const span = document.createElement('span');
+  span.textContent = def.label;
+  label.appendChild(cb);
+  label.appendChild(blaze);
+  label.appendChild(span);
+  rl.appendChild(label);
+});
+
+const tc = document.getElementById('terrain-chips');
+TERRAIN_LIST.forEach(te => {
+  const btn = document.createElement('button');
+  btn.className = 'te-chip';
+  btn.textContent = te;
+  btn.addEventListener('click', () => {
+    if (S.terrain.includes(te)) { S.terrain = S.terrain.filter(t => t !== te); btn.classList.remove('on'); }
+    else { S.terrain.push(te); btn.classList.add('on'); }
+    render();
+  });
+  tc.appendChild(btn);
+});
+
+document.querySelectorAll('.exp-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.exp-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    S.exp = +btn.dataset.exp;
+    render();
+  });
+});
+
+const sl = document.getElementById('days-sl');
+const dd = document.getElementById('days-disp');
+sl.addEventListener('input', () => {
+  S.days = +sl.value;
+  dd.textContent = S.days >= 365 ? '365+ days' : `${S.days} days`;
+  render();
+});
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    S.navPref = btn.dataset.nav;
+    render();
+  });
+});
+
+[['o-farout','farout'],['o-lottery','noLot'],['o-permit','noPerm'],['o-remote','remote'],['o-loop','loop'],['o-intl','intl']].forEach(([id, key]) => {
+  document.getElementById(id).addEventListener('change', e => { S[key] = e.target.checked; render(); });
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  S = { days:21, exp:3, months:[], regions:[], terrain:[], navPref:'any', farout:false, noLot:false, noPerm:false, remote:false, loop:false, intl:true };
+  sl.value = 21; dd.textContent = '21 days';
+  document.querySelectorAll('.exp-btn').forEach(b => b.classList.toggle('on', b.dataset.exp === '3'));
+  document.querySelectorAll('.mo-btn, .te-chip').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('#region-list input').forEach(c => c.checked = false);
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('on', b.dataset.nav === 'any'));
+  document.getElementById('o-farout').checked = false;
+  document.getElementById('o-lottery').checked = false;
+  document.getElementById('o-permit').checked = false;
+  document.getElementById('o-remote').checked = false;
+  document.getElementById('o-loop').checked = false;
+  document.getElementById('o-intl').checked = true;
+  render();
+});
+
+render();
+})();
+</script>
+
+<!-- AI / data disclosure pop-up -->
+<div class="tp-ai-ov" id="tpAiOv" hidden>
+  <div class="tp-ai-box" role="dialog" aria-modal="true" aria-labelledby="tpAiT" tabindex="-1">
+    <button type="button" class="tp-ai-x" aria-label="Close disclosure">&times;</button>
+    <h2 id="tpAiT">AI and data disclosure</h2>
+    <p>Generative AI was used to help write most of the code developed to create this front end tool.</p>
+    <p>Data were assembled, cleaned, processed, and verified directly before incorporating them into this tool, and were not generated by an LLM. This tool works differently from LLM-generated text. Results and calculations displayed by this tool are directly calculated using hard-coded methods and a fixed, underlying data set. As such, these results are not subject to hallucination, and remain repeatable.</p>
+    <p>Accuracy of displayed results depends on the reliability and accuracy of the underlying data and methods that are used.</p>
+    <p>Source code is available on my <a href="https://github.com/JKesslerPhD/trail-finder" target="_blank" rel="noopener">GitHub</a>.</p>
+    <p style="margin:1em 0 0;text-align:right"><button type="button" class="tp-ai-close">Close</button></p>
+  </div>
+</div>
+<script>
+(function(){
+  var ov=document.getElementById('tpAiOv'); if(!ov) return;
+  var box=ov.firstElementChild, opener=null;
+  function open(trigger){
+    opener=trigger; ov.hidden=false;
+    // Inside an auto-sized iframe a fixed overlay would sit in the middle of a very tall frame, so anchor it to the trigger instead.
+    if(false&&window.self!==window.top && trigger && trigger.getBoundingClientRect){
+      var y=trigger.getBoundingClientRect().bottom+(window.pageYOffset||0)+8;
+      ov.style.cssText='position:absolute;left:0;right:0;top:0;bottom:auto;align-items:flex-start;height:'+Math.max(document.documentElement.scrollHeight,y+box.offsetHeight+16)+'px;padding-top:'+y+'px';
+    }
+    box.focus();
+  }
+  function close(){ ov.hidden=true; if(opener&&opener.focus) opener.focus(); }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest&&e.target.closest('[data-tp-ai]'); if(t){ e.preventDefault(); open(t); return; }
+    if(e.target===ov||e.target.closest('.tp-ai-x,.tp-ai-close')) close();
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!ov.hidden) close(); });
+})();
+</script>
